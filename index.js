@@ -172,6 +172,17 @@ async function run() {
 
   res.send(result);
 });
+app.get("/freelancers", async (req, res) => {
+const result = await db
+.collection("user")
+.find({
+role: "freelancer",
+})
+.toArray();
+
+res.send(result);
+});
+
 
     app.get("/client-proposals", async (req, res) => {
       const email = req.query.email;
