@@ -1,3 +1,6 @@
+
+
+
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -11,6 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 const port = process.env.PORT || 5000;
+const Stripe = require("stripe");
+
+const stripe = Stripe(
+  process.env.STRIPE_SECRET_KEY
+);
 
 async function run() {
   try {
@@ -38,6 +46,58 @@ async function run() {
 
       res.send(result);
     });
+    app.post(
+      "/create-checkout-session",
+      async (req, res) => {
+        try {
+          const {
+            proposalId,
+            taskTitle,
+            freelancerName,
+            amount,
+          } = req.body;
+
+          const session =
+            await stripe.checkout.sessions.create({
+              payment_method_types: ["card"],
+
+              line_items: [
+                {
+                  price_data: {
+                    currency: "usd",
+
+                    product_data: {
+                      name: taskTitle,
+                    },
+
+                    unit_amount:
+                      Number(amount) * 100,
+                  },
+
+                  quantity: 1,
+                },
+              ],
+
+              mode: "payment",
+
+              success_url:
+                "http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}&proposalId=" +
+                proposalId,
+
+              cancel_url:
+                "http://localhost:3000/dashboard/client/manage-proposals",
+            });
+
+          res.send({
+            url: session.url,
+          });
+        } catch (error) {
+          res.status(500).send({
+            error: error.message,
+          });
+        }
+      }
+    );
 
     // Get All Open Tasks
     app.get("/tasks", async (req, res) => {
