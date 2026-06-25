@@ -272,6 +272,9 @@ async function run() {
 
       res.send(result);
     });
+    app.get("/", (req, res) => {
+  res.send("SkillSwap Server Running Successfully");
+});
     app.patch("/proposals/:id", async (req, res) => {
       const id = req.params.id;
 
