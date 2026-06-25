@@ -34,9 +34,9 @@ async function run() {
       res.send("SkillSwap Server Running");
     });
 
-    // =========================
+   
     // TASK ROUTES
-    // =========================
+   
 
     // Create Task
     app.post("/tasks", async (req, res) => {
@@ -183,9 +183,7 @@ async function run() {
       res.send(result);
     });
 
-    // =========================
-    // PROPOSAL ROUTES
-    // =========================
+    
 
     // Submit Proposal
     app.post("/proposals", async (req, res) => {
