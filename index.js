@@ -41,16 +41,34 @@ async function run() {
 
     // Get All Open Tasks
     app.get("/tasks", async (req, res) => {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 6;
+
+      const skip = (page - 1) * limit;
+
       const query = {
         status: "open",
       };
 
-      const result = await tasksCollection
+      const totalTasks =
+        await tasksCollection.countDocuments(query);
+
+      const tasks = await tasksCollection
         .find(query)
+        .skip(skip)
+        .limit(limit)
         .toArray();
 
-      res.send(result);
+      res.send({
+        tasks,
+        totalTasks,
+        totalPages: Math.ceil(
+          totalTasks / limit
+        ),
+        currentPage: page,
+      });
     });
+
 
     // Get Single Task
     app.get("/tasks/:id", async (req, res) => {
@@ -167,21 +185,21 @@ async function run() {
       });
     });
     app.get("/transactions", async (req, res) => {
-  const result =
-    await proposalsCollection.find().toArray();
+      const result =
+        await proposalsCollection.find().toArray();
 
-  res.send(result);
-});
-app.get("/freelancers", async (req, res) => {
-const result = await db
-.collection("user")
-.find({
-role: "freelancer",
-})
-.toArray();
+      res.send(result);
+    });
+    app.get("/freelancers", async (req, res) => {
+      const result = await db
+        .collection("user")
+        .find({
+          role: "freelancer",
+        })
+        .toArray();
 
-res.send(result);
-});
+      res.send(result);
+    });
 
 
     app.get("/client-proposals", async (req, res) => {
