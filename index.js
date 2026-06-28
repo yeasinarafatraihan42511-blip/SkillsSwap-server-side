@@ -22,7 +22,7 @@ const stripe = Stripe(
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
 
     const db = client.db(process.env.DB_NAME);
@@ -30,10 +30,7 @@ async function run() {
     const tasksCollection = db.collection("tasks");
     const proposalsCollection = db.collection("proposals");
 
-    app.get("/", (req, res) => {
-      res.send("SkillSwap Server Running");
-    });
-
+   
    
     // TASK ROUTES
    
@@ -153,6 +150,21 @@ async function run() {
 
       res.send(result);
     });
+    app.get("/featured-tasks", async (req, res) => {
+  try {
+    const result = await tasksCollection
+      .find({ status: "open" })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .toArray();
+
+    res.send(result);
+  } catch (error) {
+    res.status(500).send({
+      message: "Failed to load featured tasks",
+    });
+  }
+});
 
     // Update Task
     app.patch("/tasks/:id", async (req, res) => {
@@ -272,9 +284,7 @@ async function run() {
 
       res.send(result);
     });
-    app.get("/", (req, res) => {
-  res.send("SkillSwap Server Running Successfully");
-});
+    
     app.patch("/proposals/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -293,7 +303,7 @@ async function run() {
 
 
 
-    console.log("MongoDB Connected Successfully");
+    // console.log("MongoDB Connected Successfully");
 
 
   } catch (error) {
@@ -302,6 +312,11 @@ async function run() {
 }
 
 run();
+
+ app.get("/", (req, res) => {
+      res.send("SkillSwap Server Running");
+    });
+
 
 app.listen(port, () => {
   console.log(`Server running on ${port}`);
